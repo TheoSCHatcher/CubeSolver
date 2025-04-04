@@ -1,2 +1,2 @@
 cubesolver:
-	g++ Solver.cpp -o solver.a
+	g++ cubeSolver.cpp cube.cpp -o CubeSolver.a
