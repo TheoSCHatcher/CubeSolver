@@ -62,5 +62,6 @@ EncodedCubeState encodeCubeState(
 EncodedCubeState encodeCubeState(CubeState& state);
 void applyMove(CubeState& state, int move);
 bool Check_G1(CubeState& state);
+bool Check_G2(CubeState& state);
 
 #endif

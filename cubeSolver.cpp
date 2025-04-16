@@ -7,6 +7,15 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include <chrono>
+
+
+struct searchPacket{
+    bool success; 
+    std::vector<int> moves;
+    CubeState cube;
+
+};
 
 
 // R  L  F  B  U  D  R2 L2 F2 B2 U2  D2  R'  L'  F'  B'  U'  D'
@@ -47,7 +56,7 @@ CubeState GenerateRandomCube(int depth){
 
     for (int i = 0; i < depth; i++){
         int move = rand()%18;
-        std::cout << MOVE_MAP[move] << " ";
+        //std::cout << MOVE_MAP[move] << " ";
         applyMove(Cube, move);
     }
 
@@ -59,20 +68,27 @@ CubeState SOLVEDCUBE = GenerateRandomCube(0);
 EncodedCubeState ENCODEDSOLVEDCUBE = encodeCubeState(SOLVEDCUBE);
 
 
-bool DFS(std::vector<EncodedCubeState> visited, CubeState node, int depth, int maxDepth){
-    if (node==SOLVEDCUBE){
-        std::cout << "SOLVED\n";
-        return true;
+searchPacket DFS(std::vector<EncodedCubeState> visited, CubeState node, std::vector<int> moves, int depth, int stage, int maxDepth){
+    if (Check_G1(node)){
+        std::cout << "node in G1, after "<< depth <<" moves\n";
+        searchPacket output = {true, moves, node};
+        return output;
     }
     if (std::find(visited.begin(), visited.end(), encodeCubeState(node)) == visited.end() && depth < maxDepth){
         visited.push_back(encodeCubeState(node));
         for (int move : G0_MOVES){
             CubeState newNode = node;
             applyMove(newNode, move);
-            if (DFS(visited, newNode, depth+1, maxDepth)){return true;};
+            moves.push_back(move);
+            searchPacket output = DFS(visited, newNode, moves, depth+1, stage,  maxDepth); 
+            if (output.success){
+                return output;
+            };
         }   
     }
-    return false;
+    moves.erase(moves.end());
+    searchPacket output = {false, moves, node};
+    return output;
 }
 
 
@@ -85,14 +101,18 @@ int main() {
 
     //CubeState SolvedCube = {solvedCornerPerm, solvedCornerOrient, solvedEdgePerm, solvedEdgeOrient};
 
-    CubeState randomCube = GenerateRandomCube(6);
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
 
-    bool Solved = false;
-    std::vector<int> moves = {0,0,0,0,0,0};
+    CubeState randomCube = GenerateRandomCube(3);
     std::vector<EncodedCubeState> visited = {};
-    int maxDepth = 7;
-    DFS(visited, randomCube, 0, 6);
-
+    searchPacket data = DFS(visited, randomCube, {}, 0, 0, 3);
+    for (int move : data.moves){
+        std::cout << MOVE_MAP[move] << " ";
+    }
+    std::cout << "\n";
     printCubeNet(randomCube);
     return 0;
 }

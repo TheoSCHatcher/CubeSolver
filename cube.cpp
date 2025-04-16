@@ -148,7 +148,14 @@ void applyMove(CubeState& state, int move){
 
 bool Check_G1(CubeState& state){
     std::vector<int> solved = {0,0,0,0,0,0,0,0,0,0,0,0};
-    if (state.cornerPermutation == solved){return true;}
+    if (state.edgeOrientation== solved){return true;}
+    return false;
+}
+bool Check_G2(CubeState& state){
+    std::vector<int> solved = {0,0,0,0,0,0,0,0};
+    if (state.cornerOrientation == solved){
+        return true;
+    }
     return false;
 }
 
